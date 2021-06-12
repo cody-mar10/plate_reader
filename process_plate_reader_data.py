@@ -16,13 +16,14 @@ License: TBD
 
 # Import modules
 import pandas as pd
+import re
 from openpyxl import Workbook
 import openpyxl
 import argparse, os
 
 # Define WellPlate class
 class WellPlate:
-    def __init__(self, data, setup, points_per_well=4, outdir="output"):
+    def __init__(self, data, setup, active_sheet=0, outdir="output"):
         self.file = data
         self.outdir = outdir
         '''
@@ -36,10 +37,57 @@ class WellPlate:
         self.plate_setup = pd.read_csv(setup, dtype={i+1 : str for i in range(12)}).set_index("row")
         
         '''
-        Keep track of points per well, or measurements taken per well.
+        Excel worksheets can have different sheets. Here we need to set the active
+        sheet to the sheet with the raw data.
         '''
-        self.ppw = points_per_well
-    
+        self.workbook.active = active_sheet
+        self.sheet = self.workbook.active # nicer name to use later
+        
+        '''
+        Make a list of all cell values grouped into tuples per row. 
+        '''
+        self.data = list(self.sheet.values)
+        
+        '''
+        Keep track of metadata, which is approximately, the first 59 lines or so.
+        '''
+        self.metadata = self.data[0:58]
+        
+        '''
+        Keep track of points per well, or measurements taken per well. This is
+        stored in the metadata, so it can be calculated.
+        '''
+        self.ppw_row = ()
+        for row in self.metadata:
+            for cell in row:
+                if isinstance(cell, str):
+                    # Data types include str, None, and time, only want strings
+                    if "Multiple Reads per Well" in cell:
+                        self.ppw_row = row
+            if self.ppw_row: # only true if self.ppw_row is assigned in line above 
+                break
+                # end search since usually there is a second row with the same
+                # "Multiple Reads per Well" afterward that gives the area of the
+                # measurements
+
+        for cell in self.ppw_row:
+            if cell == None: # Skip empty cells
+                continue
+            # The measurements per well will be in this pattern: # x #
+            # We can grab the cell that has that pattern with this simple
+            # regular expression. This command will return None for no
+            # matches. Otherwise, it will return the matching string itself.
+            elif re.search("\d+ x \d+", cell) != None: 
+                self.ppw = cell
+        
+        '''
+        Python uses * for multiplication, not x, so we need to replace the x with
+        *. Then we evaluate the expression. Default is '2 x 2', so that would be
+        replaced with '2 * 2', which evaluates to 4.
+        '''
+        self.ppw = eval(self.ppw.replace("x", "*"))
+        #self.ppw = points_per_well
+        
     def create96Wellplate(self):
         '''
         Make all possible row/column com binations in a standard 96-well plate
@@ -636,7 +684,7 @@ def main():
     parser.add_argument("-pp", "--produceplot", action="store_false", help="Autogenerate python plot: True/False")
     parser.add_argument("-y", "--yaxis", type=str, action="store", help="y-axis label on plot", default="OD600")
     parser.add_argument("-gm", "--graphmeth", type=str, action="store", help="graphing method: time series, time diff", default="time series")
-    parser.add_argument("-pw", "--pointsperwell", type=int, action="store", help="readings per well", default=4)
+    #parser.add_argument("-pw", "--pointsperwell", type=int, action="store", help="readings per well", default=4)
     parser.add_argument("-ts", "--timescale", type=str, action="store", help="Time scale for data output and plotting", default="hr")
     parser.add_argument("-o", "--outdir", type=str, action="store", help="Name of output directory", default="output")
     parser.add_argument("-fd", "--figdim", type=str, action="store", help="Python plot figure dim in inches", default="(10,10)")
@@ -649,7 +697,7 @@ def main():
     produce_plot = args.produceplot
     y_ax_label = args.yaxis
     graph_method = args.graphmeth
-    points_per_well = args.pointsperwell
+    #points_per_well = args.pointsperwell
     time_scale = args.timescale
     outdir = args.outdir
     figdim = eval(args.figdim)
@@ -662,7 +710,7 @@ def main():
     print("active sheet:", active_sheet)
     print("graphing software:", graph_soft)
     print("graphing method:", graph_method)
-    print("points per well:", points_per_well)
+    #print("points per well:", points_per_well)
     print("producing python plot:", produce_plot)
     print("time scale:", time_scale, "\n")
     print("------------------------------------------------")
@@ -674,11 +722,15 @@ def main():
     ##################
     ## Process Data ##
     ##################
-    data = WellPlate(data = file, setup = plate_setup_file, points_per_well=points_per_well, outdir=outdir)
+    data = WellPlate(data = file,
+                     setup = plate_setup_file,
+                     #points_per_well=points_per_well,
+                     active_sheet=active_sheet,
+                     outdir=outdir)
     data.create96Wellplate()
     data.enumerateSamples()
     data.createReplicatesList()
-    data.setActiveSheet(active_sheet)
+    #data.setActiveSheet(active_sheet) # moved to init
     data.setStartExcelCell()
     data.getNumTimepoints()
     data.getAllDataTables()
