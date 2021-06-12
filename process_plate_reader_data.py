@@ -110,18 +110,7 @@ class WellPlate:
         '''
         self.workbook.active = active_sheet
         self.sheet = self.workbook.active
-    
-    def trackAirWells(self):
-        '''
-        If you have any samples that were scanned, you can just label them as "air" 
-        WITHOUT the quotes in your plate setup file, and the rest of the code will
-        ignore those file.
         
-        TODO: This is going to be eliminated soon.
-        '''
-        if "air" in self.replicates:
-            self.air_wells = self.replicates["air"]
-    
     def setStartExcelCell(self):
         '''
         First, need to find the first cell in the excel spreadsheet that actually
@@ -135,8 +124,6 @@ class WellPlate:
                     if cell.value in self.all_wells:
                         self.start_cell = cell.coordinate
                         self.found_first_datatable = True
-                        if ("air" in self.replicates) and (cell.value in myxl.air_wells): # checks if that value is was an air value
-                            self.found_first_datatable = False
                 if self.found_first_datatable:
                     break
         
