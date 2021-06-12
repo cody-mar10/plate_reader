@@ -73,8 +73,8 @@
    from the tecan i-control software. It should look very similar to
    this:
 
-   [[file:./process_plate_reader_data_image01.png]]
-   [[file:./process_plate_reader_data_image02.png]]
+   [[file:./docs/process_plate_reader_data_image01.png]]
+   [[file:./docs/process_plate_reader_data_image02.png]]
    - NOTE: your file name must not have spaces! Rename it to have no spaces (just use underscores _ ). This is good coding practice.
 
    - It is *imperative* that you do not edit the raw data. If you remove the any of the tables for wells that did not have samples, the script will fail. Version 2.0.0: I am working on a solution to this.
@@ -94,7 +94,7 @@
       - Your sample names can now be whatever you want, as long as replicates are named _EXACTLY_ the same.
       - However, I would suggest you use actual sample names instead of a code.
 
-      [[file:./process_plate_reader_data_image03.png]]
+      [[file:./docs/process_plate_reader_data_image03.png]]
 
 * S3: USAGE
 1. At the command line, once the script and your input files are in the
@@ -123,7 +123,7 @@
 8. Additionally, for help you can pass -h as your argument to get the
    list of possible args
 
-   [[file:./process_plate_reader_data_image04.png]]
+   [[file:./docs/process_plate_reader_data_image04.png]]
 
    Sheet = 0 Sheet = 1 Sheet = 2 Sheet = 3
 
