@@ -1,5 +1,5 @@
 #+TITLE: process\under{}plate\under{}reader\under{}data.py documentation
-#+DATE: May 27, 2021
+#+DATE: June 12, 2021
 #+OPTIONS: num:nil toc:nil
 #+STARTUP: align
 #+STARTUP: showall
@@ -11,47 +11,70 @@
 #+LATEX_CLASS_OPTIONS: [12pt]
 #+LATEX_HEADER_EXTRA: \usepackage{fontspec} \setmainfont{Arial}
 
-*Institution: Texas A&M University*
+#+ATTR_LATEX: :environment xltabular :width \textwidth :align lX
+|----------------------+----------------------------------------------------------|
+| Author:              | Cody Martin                                              |
+| Email:               | ccmartin6@wisc.edu                                       |
+|----------------------+----------------------------------------------------------|
+| Current Institution: | University of Wisconsin-Madison                          |
+| Department:          | Bacteriology                                             |
+|----------------------+----------------------------------------------------------|
+| Notes:               | Script created while affiliated with Dr. Ry Young lab at |
+|                      | Texas A&M University                                     |
+|                      | Department of Biochemistry & Biophysics                  |
+|                      | Center for Phage Technology                              |
+|----------------------+----------------------------------------------------------|
+| Location:            | https://github.com/cody-mar10/plate_reader.git           |
+| Version:             | 2.0.0                                                    |
+| Date:                | June 12, 2021                                            |
 
-*Department: Biochemistry and Biophysics*
-
-*Center for Phage Technology*
-
-Location: https://github.tamu.edu/cody-martin/CPT_code/plate_reader_code
-
-*Must use your TAMU account* You will need to contact me to get access to this repository.
 -----
+* Updates:
+** Version 2.0.0
+1. The script was given a major overhaul to make a more pythonic script. It is not far easier to troubleshoot, update, and read.
+   - There are also more comments in the script for documentation.
+   - A side effect of the more pythonic scripting is that the script runs much faster than previously. It shouldn't take longer than 15 seconds usually unless there is a large amount of data (full well plate used or >24 h time course). Even in those cases, it should not take more than a minute.
+2. Added new arguments users can pass for more customization.
+   - ~-ts~ to adjust time scale
+   - ~-o~ to set the output directory
+   - ~-fd~ to adjust the plot figure dimensions
+3. Previously, if there were wells that contained data that were not meant to be included in the final data output, such as if they were for a separate experiment, users had to put "air" in the plate setup for those wells. Now, users can just leave those well entries empty in the plate setup file.
+4. I've also included my Jupyter Notebook if users want an interactive demonstration. It is also easier to customize settings for plotting too.
+** What's next
+1. Currently, users need to specify the number of measurements taken per well, which has typically been defaulted to 4. This data is actually stored in the metadata on the .xlsx file, so it can just be calculated without need for user input.
+2. Because there are so many plotting parameters that could be customized, the best argument customization protocol would be to use a configuration file. I am working to implement this, so users would not need to pass an arguments on the command line. They would just need a config file with their desired parameters.
+3. Need to determine a way to plot wide data if users specify wide-data (~"excel"~) output AND want the python plot.
+4. Need to create special case where users have edited raw data and removed empty well tables.
 
-* S1: INSTALL PYTHON and SHELL
+* S1: INSTALL PYTHON and USE SHELL
 1. You will need to be somewhat familiar with your computer system's shell or command line tool.
    - For MacOS users, press: /CMD + SPACEBAR/ and search "Terminal"
-   - For Windows users, press: START, type "PowerShell", and choose
-     "Windows PowerShell"
+   - For Windows users, press: START, type "PowerShell", and choose "Windows PowerShell"
 
-2. To run this script at the command line, you will need to have installed python on your computer. If you're a python beginner, you can install miniconda3: [[https://docs.conda.io/en/latest/miniconda.html]], which has bare minimum python packages.
+2. To run this script at the command line, you will need to have installed python on your computer. If you're a python beginner, you can install miniconda3: [[https://docs.conda.io/en/latest/miniconda.html]], which has bare minimum python packages. This code was tested in ~python 3.9.4~.
 
-3. You will then need to install 2 extra python packages:
+3. You will then need to install 3 extra python packages:
    | package    | version | build                 | command                          |
    |------------+---------+-----------------------+----------------------------------|
    | pandas     |   1.1.3 | py38hb1e8313\under{}0 | ~conda install pandas=1.1.3~     |
    | openpyxl   |   3.0.5 | py\under{}0           | ~conda install openpyxl=3.0.5~   |
    | matplotlib |   3.3.2 | 0                     | ~conda install matplotlib=3.3.2~ |
 
-4. Then you can clone the repository to your local computer by using this command: ~git clone https://github.tamu.edu/cody-martin/CPT_code.git~
-   - You can delete / ignore all the other folders unrelated to ~plate_reader_code~
-   - Or you can just manually download the ~.py~ script needed in this directory.
+4. Then you can clone the repository to your local computer by using this command: ~git clone https://github.com/cody-mar10/plate_reader.git~
      
 5. To change directories (folders) on MacOS/Linux, type: ~cd ~/directory1/directory2/directory3/~ until you are in your desired directory
    - NOTE: "directory1,2,3" should be replaced with the actual folder name
    - For Windows users: I believe you can use the filepath as ~C:\dir1\dir2\dir2~
-     
-6. You will need to save the code in the same directory (folder) as your raw data from the infinite200Pro plate reader; tecan i-control 1.7.1.12 software. Do NOT edit the data. (Actually, you can just put the full file path, ie ~~/Documents/CPT/N4/plate_data.xlsx/~, instead of just the file name.)
 
+6. When you clone this github repo, it will come with 2 test datasets and the plate setup keys for you to try out along with example outputs.
+
+7. This repo can be anywhere on your device, but you will need the relative path to your data files needed as described in the next section.
+     
 * S2: INPUT FILES
 1. You will need to input *two* files to run this code: your raw data
    and your plate setup file.
 
-2. Your raw data must be the unedited .xlsx excel file that is output
+2. Your raw data must be the *unedited* .xlsx excel file that is output
    from the tecan i-control software. It should look very similar to
    this:
 
@@ -59,19 +82,20 @@ Location: https://github.tamu.edu/cody-martin/CPT_code/plate_reader_code
    [[./process_plate_reader_data_image02.png]]
    - NOTE: your file name must not have spaces! Rename it to have no spaces (just use underscores _ ). This is good coding practice.
 
+   - It is *imperative* that you do not edit the raw data. If you remove the any of the tables for wells that did not have samples, the script will fail. Version 2.0.0: I am working on a solution to this.
+
 3. Your plate reader setup must be a .csv that looks like the example
    below.
 
    1. You MUST have the headers "row..1..2....12" AND the row letters in
       CAPS!
    2. Name all replicates EXACTLY the same (just copy and paste)
-   3. Label your media-only wells as "Blank"
+      - *Version 2.0.0 Update*: Your sample names can be anything EXCEPT for "All". 
+   3. *Label your media-only wells as "Blank"*
    4. Leave empty wells blank
-   5. If for some reason, you scanned wells that you do not want/need to
-      analyze, label them "air." The code will then know to ignore those
-      wells.
-   6. Make sure there are not any extra spaces anywhere
-   7. You can make a .csv file in excel. Just save it as .csv
+      - *Version 2.0.0 Update*: If you have any wells that were scanned, but you do not want to include the data in the final output, just leave those wells blank in the plate setup file. The code will automatically ignore them.
+   5. Make sure there are not any extra spaces anywhere
+   6. You can make a .csv file in excel. Just save it as .csv
       - Your sample names can now be whatever you want, as long as replicates are named _EXACTLY_ the same.
       - However, I would suggest you use actual sample names instead of a code.
                 
@@ -112,28 +136,49 @@ Location: https://github.tamu.edu/cody-martin/CPT_code/plate_reader_code
    descriptions:
 
 #+ATTR_LATEX: :environment xltabular :width \textwidth :align lX
-| Arg | Description                                                                                                                 |
-|-----+-----------------------------------------------------------------------------------------------------------------------------|
-| -i  | input must be a .xlsx excele file from infinite200 pro plate readerl tecan i-control 1.7.1.12 software                      |
-| -p  | plate setup file must be structured a certain way as a .csv -- see the example                                              |
-|     | NOTE: replicates must be named exactly the same AND your background media samples called "Blank"                            |
-|     | Should you have samples you don't want analyzed or wells that were scanned but you don't want analyzed, label them as "air" |
-| -a  | type an integere for the sheet in your .xlsx file with the raw data                                                         |
-|     | NOTE: computers start counting at 0 so if your 2nd sheet has the data, type "1"                                             |
-|     | DEFAULT=0 (first sheet)                                                                                                     |
-| -gs | type your intended graphing program                                                                                         |
-|     | options: "excel", "R" DEFAULT="excel"                                                                                       |
-|     | "excel" will output wide formatted data                                                                                     |
-|     | "R" will output long formatted data for use in R with ggplot2                                                               |
-| -pp | bool to autogenerate a python plot                                                                                          |
-|     | DEFAULT=True                                                                                                                |
-| -y  | y-axis label                                                                                                                |
-|     | DEFAULT="OD600"                                                                                                             |
-| -gm | type of graphing method for python created graph                                                                            |
-|     | options: "time series", "time diff" DEFAULT="time series"                                                                   |
-|     | NOTE passing "time diff" does nothing yet TODO                                                                              |
-| -pw | type an integer for number of points (readings) per well                                                                    |
-|     | DEFAULT=4                                                                                                                   |
+| Arg | Description                                                                                                                                |
+|-----+--------------------------------------------------------------------------------------------------------------------------------------------|
+| -i  | input must be a .xlsx excele file from infinite200 pro plate readerl tecan i-control 1.7.1.12 software                                     |
+|-----+--------------------------------------------------------------------------------------------------------------------------------------------|
+| -p  | plate setup file must be structured a certain way as a .csv -- see the example                                                             |
+|     | NOTE: replicates must be named exactly the same AND your background media samples called "Blank"                                           |
+|     | Should you have samples you don't want analyzed or wells that were scanned but you don't want analyzed, label them as "air"                |
+|-----+--------------------------------------------------------------------------------------------------------------------------------------------|
+| -a  | type an integere for the sheet in your .xlsx file with the raw data                                                                        |
+|     | NOTE: computers start counting at 0 so if your 2nd sheet has the data, type "1"                                                            |
+|     | DEFAULT=0 (first sheet)                                                                                                                    |
+|-----+--------------------------------------------------------------------------------------------------------------------------------------------|
+| -gs | type your intended graphing program                                                                                                        |
+|     | options: "excel", "R" DEFAULT="R"                                                                                                          |
+|     | "excel" will output wide formatted data                                                                                                    |
+|     | "R" will output long formatted data for use in R with ggplot2                                                                              |
+|-----+--------------------------------------------------------------------------------------------------------------------------------------------|
+| -pp | bool to autogenerate a python plot                                                                                                         |
+|     | DEFAULT=True                                                                                                                               |
+|     | Note: To set this to false, you need to pass ~-pp~ on the command line with nothing else. The script will automatically set this to False. |
+|     | *Version 2.0.0* To produce a plot, the data must be long formatted, ie you must have the ~-gs~ parameter ~="R"~.                           |
+|-----+--------------------------------------------------------------------------------------------------------------------------------------------|
+| -y  | y-axis label                                                                                                                               |
+|     | DEFAULT="OD600"                                                                                                                            |
+|-----+--------------------------------------------------------------------------------------------------------------------------------------------|
+| -gm | type of graphing method for python created graph                                                                                           |
+|     | options: "time series", "time diff" DEFAULT="time series"                                                                                  |
+|     | NOTE passing "time diff" does nothing yet TODO                                                                                             |
+|-----+--------------------------------------------------------------------------------------------------------------------------------------------|
+| -pw | type an integer for number of points (readings) per well                                                                                   |
+|     | DEFAULT=4                                                                                                                                  |
+|     | *Version 2.0.0*: TODO deprecate this. This is stored in metadata on the plate, so it can just be calculated.                               |
+|-----+--------------------------------------------------------------------------------------------------------------------------------------------|
+| -ts | *Version 2.0.0* Time scale. Determines what time scale is output in both the returned processed data and plots                             |
+|     | Options: "sec", "min", "hr"                                                                                                                |
+|     | Default="hr".                                                                                                                              |
+|-----+--------------------------------------------------------------------------------------------------------------------------------------------|
+| -o  | *Version 2.0.0* Output directory. Specify where you want the output files.                                                                 |
+|     | Default="output"                                                                                                                           |
+|-----+--------------------------------------------------------------------------------------------------------------------------------------------|
+| -fd | *Version 2.0.0* Figure dimensions. When the python plot is produced, specify the dimensions of the plot in _inches_.                       |
+|     | Default=(10,10)                                                                                                                            |
+|     | Usage: To change this parameter, type ~"(w, h)"~ WITH the quotes.                                                                          |
 
 * S4: HOW DOES IT WORK
 
@@ -147,7 +192,7 @@ Location: https://github.tamu.edu/cody-martin/CPT_code/plate_reader_code
 3. Then it will concatenate all data tables together for all replicates
    of a single experimental group. In other words, if you have 3
    replicates of "rapid\under{}lyser\under{}2" in wells B2, B3, and B4, it will take
-   the data for wells B2,3, and 4, and create one data table of all 3
+   the data for wells B2, 3, and 4, and create one data table of all 3
    replicates for "rapid\under{}lyser\under{}2."
 
 4. Then it takes the average and standard deviation of all data points
@@ -175,4 +220,4 @@ Location: https://github.tamu.edu/cody-martin/CPT_code/plate_reader_code
    ~datafile_PROCESSED.pdf~ file. The .csv file contains for all
    experimental groups, the average signal (with background subtracted)
    and standard deviation at each timepoint, as well as the time in
-   hours. The .pdf is a python plot.
+   hours (by default). The .pdf is a python plot.
