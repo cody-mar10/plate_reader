@@ -133,7 +133,7 @@
 
 | Arg | Description                                                                                                                                |
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
-| -i  | input must be a .xlsx excele file from infinite200 pro plate readerl tecan i-control 1.7.1.12 software                                     |
+| -i  | input must be a .xlsx excel file from infinite200 pro plate reader tecan i-control 1.7.1.12 software                                     |
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
 | -p  | plate setup file must be structured a certain way as a .csv -- see the example                                                             |
 |     | NOTE: replicates must be named exactly the same AND your background media samples called "Blank"                                           |
