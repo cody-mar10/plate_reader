@@ -151,7 +151,7 @@
 | -pp | bool to autogenerate a python plot                                                                                                         |
 |     | DEFAULT=True                                                                                                                               |
 |     | Note: To set this to false, you need to pass ~-pp~ on the command line with nothing else. The script will automatically set this to False. |
-|     | *Version 2.0.0* To produce a plot, the data must be long formatted, ie you must have the ~-gs~ parameter =="R"=.                           |
+|     | *Version 2.0.0* To produce a plot, the data must be long formatted, ie you must have the ~-gs~ parameter "R".                              |
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
 | -y  | y-axis label                                                                                                                               |
 |     | DEFAULT="OD600"                                                                                                                            |
@@ -173,7 +173,7 @@
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
 | -fd | *Version 2.0.0* Figure dimensions. When the python plot is produced, specify the dimensions of the plot in _inches_.                       |
 |     | Default=(10,10)                                                                                                                            |
-|     | Usage: To change this parameter, type ="(w, h)"= WITH the quotes.                                                                          |
+|     | Usage: To change this parameter, type "(w, h)" WITH the quotes.                                                                            |
 
 * S4: HOW DOES IT WORK
 
