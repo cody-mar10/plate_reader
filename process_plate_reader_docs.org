@@ -1,5 +1,5 @@
 #+TITLE: process\under{}plate\under{}reader\under{}data.py documentation
-#+DATE: June 12, 2021
+#+DATE: June 14, 2021
 #+OPTIONS: num:nil toc:nil
 #+STARTUP: align
 #+STARTUP: showall
@@ -40,11 +40,14 @@
    - ~-fd~ to adjust the plot figure dimensions
 3. Previously, if there were wells that contained data that were not meant to be included in the final data output, such as if they were for a separate experiment, users had to put "air" in the plate setup for those wells. Now, users can just leave those well entries empty in the plate setup file.
 4. I've also included my Jupyter Notebook if users want an interactive demonstration. It is also easier to customize settings for plotting too.
+5. Previously, users has to specify the number of measurments taken per well at each timepoint, which defualts to 4 usually. Now, the script will automatically calculate this from the metadata in the sheet.
+6. I've included an executable Rscript for plotting as well. If you would like to plot the data in a nicer R plot, you should first download R and run this command:
+   - ~./plot_platereader_data.R output/file~
+   - where ~output/file~ is replaced by the file path to your long-formatted data
 ** What's next
-1. Currently, users need to specify the number of measurements taken per well, which has typically been defaulted to 4. This data is actually stored in the metadata on the .xlsx file, so it can just be calculated without need for user input. - *Completed and Implemented*
-2. Because there are so many plotting parameters that could be customized, the best argument customization protocol would be to use a configuration file. I am working to implement this, so users would not need to pass an arguments on the command line. They would just need a config file with their desired parameters.
-3. Need to determine a way to plot wide data if users specify wide-data (~"excel"~) output AND want the python plot.
-4. Need to create special case where users have edited raw data and removed empty well tables.
+1. Because there are so many plotting parameters that could be customized, the best argument customization protocol would be to use a configuration file. I am working to implement this, so users would not need to pass an arguments on the command line. They would just need a config file with their desired parameters.
+2. Need to determine a way to plot wide data if users specify wide-data (~excel~) output AND want the python plot.
+3. Need to create special case where users have edited raw data and removed empty well tables.
 
 * S1: INSTALL PYTHON and USE SHELL
 1. You will need to be somewhat familiar with your computer system's shell or command line tool.
@@ -79,8 +82,8 @@
    from the tecan i-control software. It should look very similar to
    this:
 
-   [[./process_plate_reader_data_image01.png]]
-   [[./process_plate_reader_data_image02.png]]
+   [[./docs/process_plate_reader_data_image01.png]]
+   [[./docs/process_plate_reader_data_image02.png]]
    - NOTE: your file name must not have spaces! Rename it to have no spaces (just use underscores _ ). This is good coding practice.
 
    - It is *imperative* that you do not edit the raw data. If you remove the any of the tables for wells that did not have samples, the script will fail. Version 2.0.0: I am working on a solution to this.
@@ -100,7 +103,7 @@
       - Your sample names can now be whatever you want, as long as replicates are named _EXACTLY_ the same.
       - However, I would suggest you use actual sample names instead of a code.
                 
-      [[./process_plate_reader_data_image03.png]]
+      [[./docs/process_plate_reader_data_image03.png]]
 
 * S3: USAGE
 1. At the command line, once the script and your input files are in the
@@ -129,7 +132,7 @@
 - Additionally, for help you can pass -h as your argument to get the
   list of possible args
 
-  [[./process_plate_reader_data_image04.png]]
+  [[./docs/process_plate_reader_data_image04.png]]
 
   Sheet = 0 Sheet = 1 Sheet = 2 Sheet = 3
 
@@ -139,7 +142,7 @@
 #+ATTR_LATEX: :environment xltabular :width \textwidth :align lX
 | Arg | Description                                                                                                                                |
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
-| -i  | input must be a .xlsx excel file from infinite200 pro plate reader tecan i-control 1.7.1.12 software                                     |
+| -i  | input must be a .xlsx excel file from infinite200 pro plate reader tecan i-control 1.7.1.12 software                                       |
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
 | -p  | plate setup file must be structured a certain way as a .csv -- see the example                                                             |
 |     | NOTE: replicates must be named exactly the same AND your background media samples called "Blank"                                           |
@@ -157,7 +160,7 @@
 | -pp | bool to autogenerate a python plot                                                                                                         |
 |     | DEFAULT=True                                                                                                                               |
 |     | Note: To set this to false, you need to pass ~-pp~ on the command line with nothing else. The script will automatically set this to False. |
-|     | *Version 2.0.0* To produce a plot, the data must be long formatted, ie you must have the ~-gs~ parameter "R".                              |
+|     | *Version 2.0.0* To produce a plot, the data must be long formatted, ie you must have the ~-gs~ parameter ~R~.                              |
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
 | -y  | y-axis label                                                                                                                               |
 |     | DEFAULT="OD600"                                                                                                                            |
@@ -179,7 +182,7 @@
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
 | -fd | *Version 2.0.0* Figure dimensions. When the python plot is produced, specify the dimensions of the plot in _inches_.                       |
 |     | Default=(10,10)                                                                                                                            |
-|     | Usage: To change this parameter, type "(w, h)" WITH the quotes.                                                                            |
+|     | Usage: To change this parameter, type ~(w, h)~ WITH the quotes.                                                                            |
 
 * S4: HOW DOES IT WORK
 

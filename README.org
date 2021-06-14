@@ -1,11 +1,18 @@
-# Created 2021-06-12 Sat 12:09
+# Created 2021-06-14 Mon 10:32
 #+OPTIONS: num:nil toc:nil
 #+TITLE: process\under{}plate\under{}reader\under{}data.py documentation
-#+DATE: June 12, 2021
+#+DATE: June 14, 2021
 #+AUTHOR: Cody Martin
-#+EMAIL: ccmartin6@wisc.edu
+#+EMAIL: cody.martin@tamu.edu
 #+startup: align
 #+startup: showall
+#+latex_header: \usepackage[margin=0.5in]{geometry}
+#+latex_header: \usepackage[x11names]{xcolor}
+#+latex_header: \hypersetup{linktoc = all, colorlinks = true, urlcolor = DodgerBlue4, citecolor = PaleGreen1, linkcolor = black}
+#+latex_header: \usepackage{xltabular}
+#+latex_compiler: lualatex
+#+latex_class_options: [12pt]
+#+latex_header_extra: \usepackage{fontspec} \setmainfont{Arial}
 
 |----------------------+----------------------------------------------------------|
 | Author:              | Cody Martin                                              |
@@ -35,11 +42,14 @@
    - ~-fd~ to adjust the plot figure dimensions
 3. Previously, if there were wells that contained data that were not meant to be included in the final data output, such as if they were for a separate experiment, users had to put "air" in the plate setup for those wells. Now, users can just leave those well entries empty in the plate setup file.
 4. I've also included my Jupyter Notebook if users want an interactive demonstration. It is also easier to customize settings for plotting too.
+5. Previously, users has to specify the number of measurments taken per well at each timepoint, which defualts to 4 usually. Now, the script will automatically calculate this from the metadata in the sheet.
+6. I've included an executable Rscript for plotting as well. If you would like to plot the data in a nicer R plot, you should first download R and run this command:
+   - ~./plot_platereader_data.R output/file~
+   - where ~output/file~ is replaced by the file path to your long-formatted data
 ** What's next
-1. Currently, users need to specify the number of measurements taken per well, which has typically been defaulted to 4. This data is actually stored in the metadata on the .xlsx file, so it can just be calculated without need for user input. - *Completed and Implemented*
-2. Because there are so many plotting parameters that could be customized, the best argument customization protocol would be to use a configuration file. I am working to implement this, so users would not need to pass an arguments on the command line. They would just need a config file with their desired parameters.
-3. Need to determine a way to plot wide data if users specify wide-data (~"excel"~) output AND want the python plot.
-4. Need to create special case where users have edited raw data and removed empty well tables.
+1. Because there are so many plotting parameters that could be customized, the best argument customization protocol would be to use a configuration file. I am working to implement this, so users would not need to pass an arguments on the command line. They would just need a config file with their desired parameters.
+2. Need to determine a way to plot wide data if users specify wide-data (~excel~) output AND want the python plot.
+3. Need to create special case where users have edited raw data and removed empty well tables.
 
 * S1: INSTALL PYTHON and USE SHELL
 1. You will need to be somewhat familiar with your computer system's shell or command line tool.
@@ -133,7 +143,7 @@
 
 | Arg | Description                                                                                                                                |
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
-| -i  | input must be a .xlsx excel file from infinite200 pro plate reader tecan i-control 1.7.1.12 software                                     |
+| -i  | input must be a .xlsx excel file from infinite200 pro plate reader tecan i-control 1.7.1.12 software                                       |
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
 | -p  | plate setup file must be structured a certain way as a .csv -- see the example                                                             |
 |     | NOTE: replicates must be named exactly the same AND your background media samples called "Blank"                                           |
@@ -151,7 +161,7 @@
 | -pp | bool to autogenerate a python plot                                                                                                         |
 |     | DEFAULT=True                                                                                                                               |
 |     | Note: To set this to false, you need to pass ~-pp~ on the command line with nothing else. The script will automatically set this to False. |
-|     | *Version 2.0.0* To produce a plot, the data must be long formatted, ie you must have the ~-gs~ parameter "R".                              |
+|     | *Version 2.0.0* To produce a plot, the data must be long formatted, ie you must have the ~-gs~ parameter ~R~.                              |
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
 | -y  | y-axis label                                                                                                                               |
 |     | DEFAULT="OD600"                                                                                                                            |
@@ -173,7 +183,7 @@
 |-----+--------------------------------------------------------------------------------------------------------------------------------------------|
 | -fd | *Version 2.0.0* Figure dimensions. When the python plot is produced, specify the dimensions of the plot in _inches_.                       |
 |     | Default=(10,10)                                                                                                                            |
-|     | Usage: To change this parameter, type "(w, h)" WITH the quotes.                                                                            |
+|     | Usage: To change this parameter, type ~(w, h)~ WITH the quotes.                                                                            |
 
 * S4: HOW DOES IT WORK
 

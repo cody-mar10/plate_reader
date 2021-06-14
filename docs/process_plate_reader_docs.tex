@@ -1,4 +1,4 @@
-% Created 2021-06-12 Sat 12:09
+% Created 2021-06-14 Mon 10:32
 % Intended LaTeX compiler: lualatex
 \documentclass[12pt]{article}
 \usepackage{graphicx}
@@ -19,7 +19,7 @@
 \usepackage{xltabular}
 \usepackage{fontspec} \setmainfont{Arial}
 \author{Cody Martin\thanks{cody.martin@tamu.edu}}
-\date{June 12, 2021}
+\date{June 14, 2021}
 \title{process\_plate\_reader\_data.py documentation}
 \hypersetup{
  pdfauthor={Cody Martin},
@@ -53,9 +53,9 @@ Date: & June 12, 2021\\
 
 \noindent\rule{\textwidth}{0.5pt}
 \section*{Updates:}
-\label{sec:org0cb34f4}
+\label{sec:org0f7eabb}
 \subsection*{Version 2.0.0}
-\label{sec:org7cb02ed}
+\label{sec:org5ec56d2}
 \begin{enumerate}
 \item The script was given a major overhaul to make a more pythonic script. It is not far easier to troubleshoot, update, and read.
 \begin{itemize}
@@ -70,18 +70,23 @@ Date: & June 12, 2021\\
 \end{itemize}
 \item Previously, if there were wells that contained data that were not meant to be included in the final data output, such as if they were for a separate experiment, users had to put "air" in the plate setup for those wells. Now, users can just leave those well entries empty in the plate setup file.
 \item I've also included my Jupyter Notebook if users want an interactive demonstration. It is also easier to customize settings for plotting too.
+\item Previously, users has to specify the number of measurments taken per well at each timepoint, which defualts to 4 usually. Now, the script will automatically calculate this from the metadata in the sheet.
+\item I've included an executable Rscript for plotting as well. If you would like to plot the data in a nicer R plot, you should first download R and run this command:
+\begin{itemize}
+\item \texttt{./plot\_platereader\_data.R output/file}
+\item where \texttt{output/file} is replaced by the file path to your long-formatted data
+\end{itemize}
 \end{enumerate}
 \subsection*{What's next}
-\label{sec:org66a7f80}
+\label{sec:org44c0d06}
 \begin{enumerate}
-\item Currently, users need to specify the number of measurements taken per well, which has typically been defaulted to 4. This data is actually stored in the metadata on the .xlsx file, so it can just be calculated without need for user input. - \textbf{Completed and Implemented}
 \item Because there are so many plotting parameters that could be customized, the best argument customization protocol would be to use a configuration file. I am working to implement this, so users would not need to pass an arguments on the command line. They would just need a config file with their desired parameters.
-\item Need to determine a way to plot wide data if users specify wide-data (\texttt{"excel"}) output AND want the python plot.
+\item Need to determine a way to plot wide data if users specify wide-data (\texttt{excel}) output AND want the python plot.
 \item Need to create special case where users have edited raw data and removed empty well tables.
 \end{enumerate}
 
 \section*{S1: INSTALL PYTHON and USE SHELL}
-\label{sec:orgd5e7ac6}
+\label{sec:org3bac582}
 \begin{enumerate}
 \item You will need to be somewhat familiar with your computer system's shell or command line tool.
 \begin{itemize}
@@ -117,7 +122,7 @@ regex & 2020.10.15 & py39hb5aae12\_0 & \texttt{conda install regex=2020.10.15}\\
 \end{enumerate}
 
 \section*{S2: INPUT FILES}
-\label{sec:orged18135}
+\label{sec:org3703cb0}
 \begin{enumerate}
 \item You will need to input \textbf{two} files to run this code: your raw data
 and your plate setup file.
@@ -127,10 +132,10 @@ from the tecan i-control software. It should look very similar to
 this:
 
 \begin{center}
-\includegraphics[width=.9\linewidth]{./process_plate_reader_data_image01.png}
+\includegraphics[width=.9\linewidth]{./docs/process_plate_reader_data_image01.png}
 \end{center}
 \begin{center}
-\includegraphics[width=.9\linewidth]{./process_plate_reader_data_image02.png}
+\includegraphics[width=.9\linewidth]{./docs/process_plate_reader_data_image02.png}
 \end{center}
 \begin{itemize}
 \item NOTE: your file name must not have spaces! Rename it to have no spaces (just use underscores \_ ). This is good coding practice.
@@ -161,13 +166,13 @@ CAPS!
 \end{itemize}
 
 \begin{center}
-\includegraphics[width=.9\linewidth]{./process_plate_reader_data_image03.png}
+\includegraphics[width=.9\linewidth]{./docs/process_plate_reader_data_image03.png}
 \end{center}
 \end{enumerate}
 \end{enumerate}
 
 \section*{S3: USAGE}
-\label{sec:org975538d}
+\label{sec:org7bbbb03}
 \begin{enumerate}
 \item At the command line, once the script and your input files are in the
 same directory, you can use this code like this:
@@ -200,7 +205,7 @@ is the first sheet). If the second sheet had the data, I would enter
 list of possible args
 
 \begin{center}
-\includegraphics[width=.9\linewidth]{./process_plate_reader_data_image04.png}
+\includegraphics[width=.9\linewidth]{./docs/process_plate_reader_data_image04.png}
 \end{center}
 
 Sheet = 0 Sheet = 1 Sheet = 2 Sheet = 3
@@ -213,7 +218,7 @@ descriptions:
 \begin{xltabular}{\textwidth}{lX}
 Arg & Description\\
 \hline
--i & input must be a .xlsx excele file from infinite200 pro plate readerl tecan i-control 1.7.1.12 software\\
+-i & input must be a .xlsx excel file from infinite200 pro plate reader tecan i-control 1.7.1.12 software\\
 \hline
 -p & plate setup file must be structured a certain way as a .csv -- see the example\\
  & NOTE: replicates must be named exactly the same AND your background media samples called "Blank"\\
@@ -231,7 +236,7 @@ Arg & Description\\
 -pp & bool to autogenerate a python plot\\
  & DEFAULT=True\\
  & Note: To set this to false, you need to pass \texttt{-pp} on the command line with nothing else. The script will automatically set this to False.\\
- & \textbf{Version 2.0.0} To produce a plot, the data must be long formatted, ie you must have the \texttt{-gs} parameter \texttt{="R"}.\\
+ & \textbf{Version 2.0.0} To produce a plot, the data must be long formatted, ie you must have the \texttt{-gs} parameter \texttt{R}.\\
 \hline
 -y & y-axis label\\
  & DEFAULT="OD600"\\
@@ -253,12 +258,12 @@ Arg & Description\\
 \hline
 -fd & \textbf{Version 2.0.0} Figure dimensions. When the python plot is produced, specify the dimensions of the plot in \uline{inches}.\\
  & Default=(10,10)\\
- & Usage: To change this parameter, type \texttt{"(w, h)"} WITH the quotes.\\
+ & Usage: To change this parameter, type \texttt{(w, h)} WITH the quotes.\\
 \end{xltabular}
 \end{center}
 
 \section*{S4: HOW DOES IT WORK}
-\label{sec:org6561171}
+\label{sec:orgef78a56}
 
 \begin{enumerate}
 \item The code takes your plate setup file, and groups all replicates
@@ -282,7 +287,7 @@ replicates. The default readings per well number is 4, and if you
 have 3 replicates, that equals 12 data points for each group at each
 timepoint.
 
-\item The average background signal at each timepoint is then subtracted
+\item The average background signal at each timepoint is then subtractedOo
 from the average signal at the corresponding timepoint for each
 experimental group. This value is what is present in the final
 output. Additionally, the unchanged standard deviation is also
