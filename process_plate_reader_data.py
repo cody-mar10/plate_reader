@@ -57,11 +57,15 @@ class WellPlate:
         Keep track of points per well, or measurements taken per well. This is
         stored in the metadata, so it can be calculated.
         '''
+        
+        '''
+        # This doesn't work with other plate reader software or if the 
+        # reading configuration is changed.
+        
         self.ppw_row = ()
         for row in self.metadata:
             for cell in row:
-                if isinstance(cell, str):
-                    # Data types include str, None, and time, only want strings
+                if isinstance(cell, str): # Data types include str, None, and time, only want strings
                     if "Multiple Reads per Well" in cell:
                         self.ppw_row = row
             if self.ppw_row: # only true if self.ppw_row is assigned in line above 
@@ -80,14 +84,15 @@ class WellPlate:
             elif re.search("\d+ x \d+", cell) != None: 
                 self.ppw = cell
         
-        '''
+        
         Python uses * for multiplication, not x, so we need to replace the x with
         *. Then we evaluate the expression. Default is '2 x 2', so that would be
         replaced with '2 * 2', which evaluates to 4.
-        '''
+        
         self.ppw = eval(self.ppw.replace("x", "*"))
         #self.ppw = points_per_well
-        
+        '''
+    
     def create96Wellplate(self):
         '''
         Make all possible row/column com binations in a standard 96-well plate
@@ -126,21 +131,18 @@ class WellPlate:
             hits = self.plate_setup.isin([sample])
 
             '''
-            Convert that result to column names
+            Remove all wells that are not replicates of a given sample.
             '''
-            hits_series = hits.any()
-            cols = list(hits_series[hits_series == True].index)
-
-            '''
-            Get row names 
-            '''
-            rows = [list(hits[col][hits[col] == True].index) for col in cols]
-            rows = [j for i in rows for j in i] # needed to flatten a 2d list
+            replicates = hits.where(hits).dropna(how="all").dropna(axis=1, how="all")
 
             '''
             For a given sample, concatenate the row/col coordinate into a single list
             '''
-            positions = [row+col for row,col in zip(*[rows,cols])]
+            positions = [
+                row+col 
+                for row in replicates.index
+                for col in replicates.columns
+            ]
 
             return positions
         
@@ -151,14 +153,6 @@ class WellPlate:
         
         self.cells = sum(list(self.replicates.values()), [])
     
-    def setActiveSheet(self, active_sheet=0):
-        '''
-        Excel worksheets can have different sheets. Here we need to set the active
-        sheet to the sheet with the raw data.
-        '''
-        self.workbook.active = active_sheet
-        self.sheet = self.workbook.active
-        
     def setStartExcelCell(self):
         '''
         First, need to find the first cell in the excel spreadsheet that actually
@@ -175,7 +169,7 @@ class WellPlate:
                 if self.found_first_datatable:
                     break
         
-        findFirstDatatable()
+        findFirstDatatable() # set self.start_cell
         
         def splitCellCoordinates():
             '''
@@ -191,9 +185,49 @@ class WellPlate:
                 ''.join(self.xl_col_letters), ''.join(self.xl_row_num)
             ]
         
-        splitCellCoordinates()
+        splitCellCoordinates() # set self.start_cell_split
     
         self.start_row = int(self.start_cell_split[1])
+        
+        def set_points_per_well():
+            '''
+            With some plate reader software, the readings or points per well is set
+            in the meta data at the top. However, changing the configuration or 
+            using a different software may use different notation to define
+            the measurements taken per well. This will just calculate the points
+            per well by counting the number of data points in the subsequent data 
+            tables.
+            '''
+
+            # keep a counter for points per well
+            self.ppw = 0
+
+            '''
+            Start 5 rows after the first data table row, which skips:
+                - Well name
+                - Time
+                - Temp
+                - Mean
+                - StDev
+            This gets to the actual individual measurements per well.
+            '''
+            for row in self.sheet.iter_rows(min_row=self.start_row+5):
+                if not all(cell.value is None for cell in row):
+                    '''
+                    If the entire row is not blank, increment the number of points per
+                    well.
+                    '''
+                    self.ppw += 1
+                else:
+                    '''
+                    Stop when we get to a completely blank row. In the xlsx raw data
+                    file, there are blank rows in between all the data tables for each
+                    well (followed by a cell that says "Cycles / Well").
+                    '''
+                    break
+        
+        set_points_per_well() # set self.ppw
+
         '''
         The end row is the end row for a particular well, ie the end row of that 
         data table. It should be equal exactly 4 + points_per_well away from the
@@ -220,11 +254,6 @@ class WellPlate:
         ]) - 1
     
     def getAllDataTables(self):
-        '''
-        Make a list of all cell values grouped into tuples per row. 
-        '''
-        self.data = list(self.sheet.values)
-        
         def getWellTable(start_row, end_row):
             '''
             Get column names for each data table. This function will exit if the 

@@ -25,11 +25,16 @@
 |                      | Center for Phage Technology                              |
 |----------------------+----------------------------------------------------------|
 | Location:            | https://github.com/cody-mar10/plate_reader.git           |
-| Version:             | 2.0.0                                                    |
-| Date:                | June 12, 2021                                            |
+| Version:             | 2.0.1                                                    |
+| Date:                | August 7, 2021                                           |
 
 -----
 * Updates:
+** Version 2.0.1
+1. When grouping replicates together, the code ignored replicates that were in the same column. This has been fixed.
+2. The code is now compatible with *SparkControl Version V1.2.20* plate reader software.
+   - To achieve this, the way the points or measurements taken per well were tracked had to be changed. Now the code just counts the number of measurements taken in the A1 well.
+3. *There is no change to how users use the code.*
 ** Version 2.0.0
 1. The script was given a major overhaul to make a more pythonic script. It is not far easier to troubleshoot, update, and read.
    - There are also more comments in the script for documentation.
